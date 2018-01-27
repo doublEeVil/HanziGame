@@ -113,6 +113,7 @@ cc.Class({
             self.index--;
             if (self.index <= 0) {
                 self.index = 1;
+                return;
             }
             self.loadAll();
         });
@@ -122,6 +123,7 @@ cc.Class({
             self.index++;
             if (self.index >= 11) {
                 self.index = 11;
+                return;
             }
             self.loadAll();
         });

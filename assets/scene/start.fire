@@ -96,8 +96,8 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 960,
-      "height": 640
+      "width": 640,
+      "height": 1136
     },
     "_rotationX": 0,
     "_rotationY": 0,
@@ -105,8 +105,8 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 480,
-      "y": 320
+      "x": 320,
+      "y": 568
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -153,12 +153,12 @@
     },
     "_rotationX": 0,
     "_rotationY": 0,
-    "_scaleX": 1.8,
-    "_scaleY": 1.8,
+    "_scaleX": 2.8,
+    "_scaleY": 3.1,
     "_position": {
       "__type__": "cc.Vec2",
       "x": 500,
-      "y": 0
+      "y": -6
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -234,7 +234,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 150,
-      "height": 40
+      "height": 80
     },
     "_rotationX": 0,
     "_rotationY": 0,
@@ -242,8 +242,8 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 330,
-      "y": -179
+      "x": 157,
+      "y": -342
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -286,7 +286,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 150,
-      "height": 40
+      "height": 80
     },
     "_rotationX": 0,
     "_rotationY": 0,
@@ -454,12 +454,12 @@
     },
     "_rotationX": 0,
     "_rotationY": 0,
-    "_scaleX": 1,
-    "_scaleY": 1,
+    "_scaleX": 1.5,
+    "_scaleY": 1.5,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": -244,
-      "y": 60
+      "x": -368,
+      "y": -5
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -532,12 +532,12 @@
     },
     "_rotationX": 0,
     "_rotationY": 0,
-    "_scaleX": 1,
-    "_scaleY": 1,
+    "_scaleX": 1.5,
+    "_scaleY": 1.5,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 262,
-      "y": 60
+      "x": 392,
+      "y": -5
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -582,11 +582,11 @@
     "_enabled": true,
     "_designResolution": {
       "__type__": "cc.Size",
-      "width": 960,
-      "height": 640
+      "width": 640,
+      "height": 1136
     },
     "_fitWidth": false,
-    "_fitHeight": true
+    "_fitHeight": false
   },
   {
     "__type__": "13096jisA5BF42qudwwlTPb",

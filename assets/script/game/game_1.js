@@ -54,18 +54,35 @@ cc.Class({
         //
         sp_pinyin: {
             default: null,
-            type: cc.Node
+            type: cc.Sprite
         },
 
         sp_shiyi: {
             default: null,
-            type: cc.Node
+            type: cc.Sprite
         },
 
         sp_ziti: {
             default: null,
+            type: cc.Sprite
+        },
+
+        //播放gif
+        wbview_bihua :{
+            default: null,
+            type: cc.WebView
+        },
+        
+        pos: {
+            default: null,
             type: cc.Node
         },
+
+        //拼音
+        lb_pinyin: {
+            default: null,
+            type: cc.Label
+        }
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -81,7 +98,7 @@ cc.Class({
             "7": "jiu",
             "8": "he",
             "9": "wang",
-            "10": "bei",
+            "10": "fan",
             "11": "dan",
         },
         this.num2len = {
@@ -98,18 +115,45 @@ cc.Class({
             "11": 3,      
         },
 
+        this.num2hanzi = {
+            "1": "米",
+            "2": "杯",
+            "3": "吃",            
+            "4": "面",            
+            "5": "茶",            
+            "6": "汤",            
+            "7": "酒",  
+            "8": "喝",
+            "9": "碗",
+            "10": "饭",            
+            "11": "蛋",                                       
+        }
+
         this.WIDTH = cc.director.getWinSize().width;
         this.HEIGHT = cc.director.getWinSize().height;
     },
 
+    /**
+     * 一开始只出现一个字
+     * 然后字飘到左上角
+     * 笔画和图片同时出现
+     */
     start () {
         var self = this;
         this.btn_audio.node.on(cc.Node.EventType.TOUCH_START, function() {
             cc.log("btn_audio press");
+            //按钮变化
+            let action1 = cc.scaleBy(0.1, 1.1).easing(cc.easeCubicActionOut());
+            let action2 = cc.scaleTo(0.1, 1.0).easing(cc.easeCubicActionOut());
+            self.btn_audio.node.runAction(cc.sequence(action1, action2));
         });
 
         this.btn_forward.node.on(cc.Node.EventType.TOUCH_START, function() {
             cc.log("btn_forward press");
+            //按钮变化
+            let action1 = cc.scaleBy(0.1, 1.1).easing(cc.easeCubicActionOut());
+            let action2 = cc.scaleTo(0.1, 1.0).easing(cc.easeCubicActionOut());
+            self.btn_forward.node.runAction(cc.sequence(action1, action2));
             self.index--;
             if (self.index <= 0) {
                 self.index = 1;
@@ -120,8 +164,12 @@ cc.Class({
 
         this.btn_next.node.on(cc.Node.EventType.TOUCH_START, function() {
             cc.log("btn_next press");
+            //按钮变化
+            let action1 = cc.scaleBy(0.1, 1.1).easing(cc.easeCubicActionOut());
+            let action2 = cc.scaleTo(0.1, 1.0).easing(cc.easeCubicActionOut());
+            self.btn_next.node.runAction(cc.sequence(action1, action2));
             self.index++;
-            if (self.index >= 11) {
+            if (self.index >= 12) {
                 self.index = 11;
                 return;
             }
@@ -140,30 +188,51 @@ cc.Class({
     loadAll: function() {
         // pinyin
         var self = this;
-        let url_pinyin = 'img/pinyin/pinyin_' + this.num2res["" + this.index] + '.png';
-        this.sp_pinyin.spriteFrame.setTexture(cc.url.raw(url_pinyin)); 
-        cc.log("--", this.sp_pinyin.node.width)
+        // let url_pinyin = 'img/pinyin/pinyin_' + this.num2res["" + this.index] + '.png';
+        // this.sp_pinyin.spriteFrame.setTexture(cc.url.raw(url_pinyin)); 
+        // cc.log("--", this.sp_pinyin.node.width)
         //this.sp_pinyin.node.width = 12 * this.num2len[this.index];
-        //shiyi
+        this.lb_pinyin.getComponent("PinYinLabel").pinyinString = this.num2hanzi["" + this.index];
+
+
         let url_shiyi = 'img/shiyi/shiyi_' + this.num2res["" + this.index] + '.png';
         this.sp_shiyi.spriteFrame.setTexture(cc.url.raw(url_shiyi));
-        this.sp_shiyi.node.opacity = 0;
-        let action1 = cc.fadeIn(1.5);
+        this.sp_shiyi.node.runAction(cc.hide());
+        
+        let opacity255 = cc.fadeIn(2.5);
         this.scheduleOnce(function() {
-            this.sp_shiyi.node.runAction(action1);
-        }, 1.0);
+            this.sp_shiyi.node.runAction(cc.show());
+            this.sp_shiyi.node.runAction(opacity255);
+            //this.sp_shiyi.node.runAction(cc.spawn(opacity255, cc.show()));
+        }, 1);
 
-        //ziti
+        //出现字
         let url_ziti = 'img/ziti/ziti_' + this.num2res["" + this.index] + '.png';
         this.sp_ziti.spriteFrame.setTexture(cc.url.raw(url_ziti));
-        this.sp_ziti.node.x = 0;
-        this.sp_ziti.node.y = 0;
-        let move = cc.moveTo(1.5, cc.p(-400, 250)).easing(cc.easeCubicActionOut());
-        let scale = cc.scaleTo(1.5, 1).easing(cc.easeCubicActionOut());
-        let action2 = cc.spawn(move, scale);
+        // this.sp_ziti.node.x = this.pos.x;
+        // this.sp_ziti.node.y = this.pos.y;
+        // this.sp_ziti.node.scale = 4;
+        // this.sp_ziti.node.opacity = 255;
+
+        let move1 = cc.moveTo(0, cc.p(this.pos.x, this.pos.y));
+        let scale1 = cc.scaleTo(0, 1);
+        this.sp_ziti.node.runAction(cc.spawn(move1, scale1));
+
+        let move2 = cc.moveTo(1.5, cc.p(-186, 437)).easing(cc.easeCubicActionOut());
+        let scale2 = cc.scaleTo(1.5, 0.2).easing(cc.easeCubicActionOut());
+        let action2 = cc.spawn(move2, scale2);
         this.scheduleOnce(function() {
             this.sp_ziti.node.runAction(action2);
-        }, 0.2);
+        }, 0.5);
+
+        //笔画,用webview播放gif
+        cc.log("bihua..", this.wbview_bihua)
+        this.wbview_bihua.node.runAction(cc.hide());
+        this.scheduleOnce(function(){
+            this.wbview_bihua.node.runAction(cc.show());
+            let url_bihua = 'img/zixing/zixing_' + this.num2res["" + this.index] + '.gif';
+            this.wbview_bihua.url = cc.url.raw(url_bihua);
+        }, 1)
 
     },
 

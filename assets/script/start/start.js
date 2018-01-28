@@ -58,18 +58,18 @@ cc.Class({
         cc.log("WIDTH:", WIDTH, " HIGHT:", HEIGHT)
 
         //移动背景2_1
-        let move_1 = cc.moveTo(5.0, cc.p(-this.bg_2_1.width*2, this.bg_2_1.y)).easing(cc.easeCubicActionOut());
+        let move_1 = cc.moveTo(2.5, cc.p(-this.bg_2_1.width*2, this.bg_2_1.y)).easing(cc.easeCubicActionIn());
         this.bg_2_1.runAction(move_1);
         
         //移动背景2_2
-        let move_2 = cc.moveTo(5.0, cc.p(this.bg_2_2.width*2, this.bg_2_2.y)).easing(cc.easeCubicActionOut());
+        let move_2 = cc.moveTo(2.5, cc.p(this.bg_2_2.width*2, this.bg_2_2.y)).easing(cc.easeCubicActionIn());
         this.bg_2_2.runAction(move_2);
         
         //移动背景1
         let move_3 = cc.moveTo(10, cc.p(-this.bg_1.width/4, this.bg_1.y)).easing(cc.easeCubicActionOut());
         this.scheduleOnce(function() {
             this.bg_1.runAction(move_3);
-        }, 1);
+        }, 2);
 
         //添加按钮事件
         this.btn_start.on(cc.Node.EventType.TOUCH_START, function() {

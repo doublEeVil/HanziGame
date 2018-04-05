@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "67bba67d-f9ea-4a5d-a7db-b3eb1df71ff4",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "info_jiliyi_03": {
+      "ver": "1.0.3",
+      "uuid": "fdfbdf51-a62d-4e89-80fa-b3382526ff4e",
+      "rawTextureUuid": "67bba67d-f9ea-4a5d-a7db-b3eb1df71ff4",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": 0,
+      "offsetY": 0,
+      "trimX": 0,
+      "trimY": 0,
+      "width": 400,
+      "height": 600,
+      "rawWidth": 400,
+      "rawHeight": 600,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

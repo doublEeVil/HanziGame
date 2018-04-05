@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "605e6ac2-3207-40e3-bf9e-b6d3eb1dcd5c",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "ziti_tang": {
+      "ver": "1.0.3",
+      "uuid": "50ff4693-3cda-4a63-bfe4-7aa9bfb09695",
+      "rawTextureUuid": "605e6ac2-3207-40e3-bf9e-b6d3eb1dcd5c",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -1,
+      "offsetY": -2,
+      "trimX": 15,
+      "trimY": 18,
+      "width": 68,
+      "height": 68,
+      "rawWidth": 100,
+      "rawHeight": 100,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

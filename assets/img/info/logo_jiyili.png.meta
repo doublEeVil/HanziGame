@@ -1,0 +1,30 @@
+{
+  "ver": "1.0.0",
+  "uuid": "126cc929-854e-4296-9162-93859ef16e7e",
+  "type": "sprite",
+  "wrapMode": "clamp",
+  "filterMode": "bilinear",
+  "subMetas": {
+    "logo_jiyili": {
+      "ver": "1.0.3",
+      "uuid": "ea725c2f-18c0-47ff-b254-2195b1805134",
+      "rawTextureUuid": "126cc929-854e-4296-9162-93859ef16e7e",
+      "trimType": "auto",
+      "trimThreshold": 1,
+      "rotated": false,
+      "offsetX": -9,
+      "offsetY": -0.5,
+      "trimX": 44,
+      "trimY": 89,
+      "width": 348,
+      "height": 163,
+      "rawWidth": 454,
+      "rawHeight": 340,
+      "borderTop": 0,
+      "borderBottom": 0,
+      "borderLeft": 0,
+      "borderRight": 0,
+      "subMetas": {}
+    }
+  }
+}

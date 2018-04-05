@@ -96,8 +96,8 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 480,
-      "y": 320
+      "x": 320,
+      "y": 568
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -108,7 +108,7 @@
   },
   {
     "__type__": "cc.Node",
-    "_name": "webview",
+    "_name": "bg_game",
     "_objFlags": 0,
     "_parent": {
       "__id__": 2
@@ -122,7 +122,7 @@
       }
     ],
     "_prefab": null,
-    "_id": "9chch7EsFCKYSk/7gP5zG6",
+    "_id": "cbqCGQb59NOZ5UpkGapt2C",
     "_opacity": 255,
     "_color": {
       "__type__": "cc.Color",
@@ -139,17 +139,17 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 600,
-      "height": 600
+      "width": 1024,
+      "height": 768
     },
     "_rotationX": 0,
     "_rotationY": 0,
-    "_scaleX": 0.5,
-    "_scaleY": 0.5,
+    "_scaleX": 1,
+    "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": 6,
-      "y": -142
+      "x": 4,
+      "y": -9
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -159,16 +159,30 @@
     "groupIndex": 0
   },
   {
-    "__type__": "cc.WebView",
+    "__type__": "cc.Sprite",
     "_name": "",
     "_objFlags": 0,
     "node": {
       "__id__": 3
     },
     "_enabled": true,
-    "_useOriginalSize": false,
-    "_url": "http://localhost:8080/zixing_bei.gif",
-    "webviewEvents": []
+    "_spriteFrame": {
+      "__uuid__": "f26eeb0e-9153-4035-9191-9e0263a4e400"
+    },
+    "_type": 0,
+    "_sizeMode": 1,
+    "_fillType": 0,
+    "_fillCenter": {
+      "__type__": "cc.Vec2",
+      "x": 0,
+      "y": 0
+    },
+    "_fillStart": 0,
+    "_fillRange": 0,
+    "_isTrimmedMode": true,
+    "_srcBlendFactor": 770,
+    "_dstBlendFactor": 771,
+    "_atlas": null
   },
   {
     "__type__": "cc.Canvas",
@@ -187,19 +201,18 @@
     "_fitHeight": true
   },
   {
-    "__type__": "cc.Animation",
+    "__type__": "1bcfa2YILtLW5jhJwFg1ILC",
     "_name": "",
     "_objFlags": 0,
     "node": {
       "__id__": 2
     },
     "_enabled": true,
-    "_defaultClip": null,
-    "_clips": [
-      {
-        "__uuid__": "3663117a-42cb-49f0-9dbd-ac8405b0e490"
-      }
-    ],
-    "playOnLoad": false
+    "entity": {
+      "__uuid__": "09d21095-5370-4081-9965-a4736c61d25b"
+    },
+    "partical": {
+      "__uuid__": "9ddab92c-9ff8-44b4-a009-77e4a7914948"
+    }
   }
 ]

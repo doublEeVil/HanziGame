@@ -146,6 +146,11 @@ cc.Class({
             default:null,
             type: cc.AudioSource
         },
+
+        goal_node: {
+            default: null,
+            type: cc.Node
+        }
     },
 
     onLoad () {
@@ -341,25 +346,35 @@ cc.Class({
         }
 
         this.aim_node = cc.instantiate(ani);
-        this.aim_node.x = this.sp_aim.x + 578;
-        this.aim_node.y = this.sp_aim.y - 4;
-        this.node.addChild(this.aim_node);
+        //this.aim_node.x = this.sp_aim.x + 578;
+        //this.aim_node.y = this.sp_aim.y - 4;
+        this.aim_node.x = this.sp_aim.x
+        this.aim_node.y = this.sp_aim.y
+        this.sp_aim = this.aim_node;
+        this.goal_node.addChild(this.sp_aim);
+        //this.node.addChild(this.aim_node);
 
         this.aim_node_2 = cc.instantiate(ani_2);
-        this.aim_node_2.x = this.sp_aim_2.x + 578;
-        this.aim_node_2.y = this.sp_aim_2.y - 4;
-        this.node.addChild(this.aim_node_2);
+        // this.aim_node_2.x = this.sp_aim_2.x + 578;
+        // this.aim_node_2.y = this.sp_aim_2.y - 4;
+        //this.node.addChild(this.aim_node_2);
+        this.aim_node_2.x = this.sp_aim_2.x;
+        this.aim_node_2.y = this.sp_aim_2.y;
+        this.sp_aim_2 = this.aim_node_2;
+        this.goal_node.addChild(this.aim_node_2);
 
         if (this.level == 5 || this.level == 6) {
             // 添加发音按钮事件
             this.aim_node.on(cc.Node.EventType.TOUCH_END, function() {
                 let index = this.aniPer.indexOf(this.showIce[this.aim_type]);
-                this.audio[index].play();
+                //this.audio[index].play();
+                this.playAudio(this.audio[index]);
             }, this);
 
             this.aim_node_2.on(cc.Node.EventType.TOUCH_END, function() {
                 let index = this.aniPer.indexOf(this.showIce[this.aim_type_2]);
-                this.audio[index].play();
+                //this.audio[index].play();
+                this.playAudio(this.audio[index]);
             }, this);
         }
 
@@ -381,75 +396,91 @@ cc.Class({
 
         let self = this;
         cc.log('xxl start');
-        //0. 先自定义好要显示的哪四种
-        //1. 摆好 7 * 7的
-        let rand;
-
-        for (let x = 0; x < 7; x++) {
-            let arrY = [];
-            for (let y = 0; y < 7; y++) {
-                rand = this.getRand(5);
-                var obj = cc.instantiate(this.showIce[rand]);
-                obj.x = this.startX + (x * 70);
-                obj.y = this.startY + (y * 70);
-                obj.type = rand;
-                obj.indexX = x;
-                obj.indexY = y;
-                this.node.addChild(obj);
-                arrY[y] = obj;
-            }
-            this.objs[x] = arrY;
-        }
-        this.addCallBack(this.node);
         
-        // 初始化是否消除
-        let arr = this.checkCanDestroy();
-        var callback = function() {
-            //this.removeCallback();
-            if (arr.length >= 3) {
-                this.scheduleOnce(function() {
-                    this.destroyObj(arr);
-                }, 0.1);
-            } else {
-                this.unschedule(callback);
-                //this.addCallBack(this.node);
-            }
-            arr = this.checkCanDestroy();
-        }
-        this.schedule(callback, 0.5, 160);
+        //先显示目标
+        let initX = this.goal_node.x;
+        let initY = this.goal_node.y; 
+        this.goal_node.setPosition(initX - 300, initY);
+        this.node.opacity = 0;
+        this.scheduleOnce(function() {
+            this.goal_node.runAction(cc.moveTo(1, initX, initY));
+        }, 2);
+        
+        this.scheduleOnce(function() {
+            this.node.opacity = 255;
 
-        // 倒计时
-        this.schedule(function() {
-            this.timeLeft--;
-            if (!this.audio_dida.isPlaying) {
-                if (cc.sys.localStorage.getItem("audio") != "off") { 
-                    // 循环播放
-                    this.audio_dida.play();
-                    this.audio_dida.loop = true;
+            //0. 先自定义好要显示的哪四种
+            //1. 摆好 7 * 7的
+            let rand;
+
+            for (let x = 0; x < 7; x++) {
+                let arrY = [];
+                for (let y = 0; y < 7; y++) {
+                    rand = this.getRand(5);
+                    var obj = cc.instantiate(this.showIce[rand]);
+                    obj.x = this.startX + (x * 70);
+                    obj.y = this.startY + (y * 70);
+                    obj.type = rand;
+                    obj.indexX = x;
+                    obj.indexY = y;
+                    this.node.addChild(obj);
+                    arrY[y] = obj;
                 }
+                this.objs[x] = arrY;
             }
 
-            if (this.timeLeft < 0) {
-                return;
+            this.addCallBack(this.node);
+        
+            // 初始化是否消除
+            let arr = this.checkCanDestroy();
+            var callback = function() {
+                //this.removeCallback();
+                if (arr.length >= 3) {
+                    this.scheduleOnce(function() {
+                        this.destroyObj(arr);
+                    }, 0.1);
+                } else {
+                    this.unschedule(callback);
+                    //this.addCallBack(this.node);
+                }
+                arr = this.checkCanDestroy();
             }
-            if (this.timeLeft == 0) {
-                //alert("计时结束，要加油哦");
-                this.gameFail();
-            }
-            this.lb_time.string = (this.timeLeft + " s")
-        }, 1);
+            this.schedule(callback, 0.5, 160);
 
-        // 检测是否完成目标
-        this.schedule(function() {
-            if (this.done_num >= this.aim_num && this.level % 2 == 1) {
-                this.gameSuccess();
-                return;
-            }
-            if (this.done_num >= this.aim_num && this.done_num_2 >= this.aim_num_2 && this.level % 2 == 0) {
-                this.gameSuccess();
-                return;
-            }
-        }, 0.5);
+            // 倒计时
+            this.schedule(function() {
+                this.timeLeft--;
+                if (!this.audio_dida.isPlaying) {
+                    if (cc.sys.localStorage.getItem("audio") != "off") { 
+                        // 循环播放
+                        this.audio_dida.play();
+                        this.audio_dida.loop = true;
+                    }
+                }
+
+                if (this.timeLeft < 0) {
+                    return;
+                }
+                if (this.timeLeft == 0) {
+                    //alert("计时结束，要加油哦");
+                    this.gameFail();
+                }
+                this.lb_time.string = (this.timeLeft + " s")
+            }, 1);
+
+            // 检测是否完成目标
+            this.schedule(function() {
+                if (this.done_num >= this.aim_num && this.level % 2 == 1) {
+                    this.gameSuccess();
+                    return;
+                }
+                if (this.done_num >= this.aim_num && this.done_num_2 >= this.aim_num_2 && this.level % 2 == 0) {
+                    this.gameSuccess();
+                    return;
+                }
+            }, 0.5);
+        }, 3);
+
     },
 
     gameSuccess: function() {
@@ -480,7 +511,7 @@ cc.Class({
         this.pass = false;
         this.unscheduleAllCallbacks();
         this.canvas.opacity = 100;
-        this.lb_title.string = "时间到了哦！是否再来一局？";
+        this.lb_title.string = "挑战失败了哦\n是否again?";
         this.dialog.active = true;
         this.node.off(cc.Node.EventType.TOUCH_START);
     },
@@ -645,7 +676,8 @@ cc.Class({
         }
         //可以消除， 播放音效
         if (cc.sys.localStorage.getItem("audio") != "off") { 
-            this.audio_ice.play();
+            //this.audio_ice.play();
+            this.playAudio(this.audio_ice);
         }
       
         this.refresh();
@@ -845,6 +877,14 @@ cc.Class({
             return "richang";
         }
         return mode;
+    },
+
+    playAudio: function(audio) {
+        this.bgm.volume = 0.2;
+        audio.play();
+        this.scheduleOnce(function(){
+            this.bgm.volume = 1;
+        }, audio.getDuration()+0.2);
     }
 
     // update (dt) {},

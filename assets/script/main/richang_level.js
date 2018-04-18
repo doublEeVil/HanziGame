@@ -39,6 +39,21 @@ cc.Class({
         loading: {
             default: null,
             type: cc.ProgressBar
+        },
+
+        dialog: {
+            default: null,
+            type: cc.Node
+        },
+
+        btn_ok: {
+            default: null,
+            type: cc.Node
+        },
+
+        btn_no: {
+            default: null,
+            type: cc.Node
         }
     },
 
@@ -71,7 +86,55 @@ cc.Class({
             });
         });
 
+        this.btn_ok.on(cc.Node.EventType.TOUCH_END, function(){
+            self.dialog.active = false;
+
+            //进入游戏界面
+            self.loading.node.active = true;
+            self.node.opacity = 50;
+
+            cc.loader.onProgress = function (num, total, item) {
+                cc.log(num, total);
+                self.loading.progress = num / total;
+                if (num == total) { 
+                    cc.director.loadScene("xuexi_richang");
+                    cc.loader.onProgress = function(){}
+                }
+            }
+
+            cc.director.preloadScene("xuexi_richang", function() {
+
+            });
+        });
+
+        this.btn_no.on(cc.Node.EventType.TOUCH_END, function(){
+            cc.log("---", self.loadSceneName)
+            // 进入对应的界面
+            self.dialog.active = false;
+            self.loading.node.active = true;
+            self.node.opacity = 50;
+
+            cc.loader.onProgress = function (num, total, item) {
+                cc.log(num, total);
+                self.loading.progress = num / total;
+                if (num == total) { 
+                    cc.director.loadScene(self.loadSceneName);
+                    cc.loader.onProgress = function(){}
+                }
+            }
+
+            cc.director.preloadScene(self.loadSceneName, function() {
+
+            });
+        });
+
         this.btn_jiyili.on(cc.Node.EventType.TOUCH_END, function() {
+            if (self.isFirstLoad()) {
+                self.node.opacity = 125;
+                self.dialog.active = true;
+                self.loadSceneName = "jiyili_game_03";
+                return;
+            }
             self.loading.node.active = true;
             self.node.opacity = 50;
 
@@ -90,6 +153,13 @@ cc.Class({
         });
 
         this.btn_xxl.on(cc.Node.EventType.TOUCH_END, function() {
+            if (self.isFirstLoad()) {
+                self.node.opacity = 125;
+                self.dialog.active = true;
+                self.loadSceneName = "xxl_game";
+                return;
+            }
+
             self.loading.node.active = true;
             self.node.opacity = 50;
 
@@ -108,6 +178,13 @@ cc.Class({
         });
 
         this.btn_buyu.on(cc.Node.EventType.TOUCH_END, function() {
+            if (self.isFirstLoad()) {
+                self.node.opacity = 125;
+                self.dialog.active = true;
+                self.loadSceneName = "buyu_game";
+                return;
+            }
+
             self.loading.node.active = true;
             self.node.opacity = 50;
 
@@ -126,5 +203,12 @@ cc.Class({
         });
     },
 
+    isFirstLoad: function() {
+        if (null == cc.sys.localStorage.getItem("richang_level_first")) {
+            cc.sys.localStorage.setItem("richang_level_first", "true")
+            return true;
+        }
+        return true;
+    }
     // update (dt) {},
 });

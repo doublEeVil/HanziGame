@@ -139,7 +139,8 @@ cc.Class({
         this.cardsChoose = [];
         this.cardsNotice = [];
 
-        this.timeLeft = 30;
+        this.INIT_TIME = 40;
+        this.timeLeft = 40;
         this.pass = false;
 
         // 判断音效
@@ -165,6 +166,7 @@ cc.Class({
         });
 
         this.lb_coin.string = "+" + this.getCoin();
+        this.lb_time.string = (this.timeLeft + " s");
 
         this.game_info.active = true;
         this.node.opacity = 120;
@@ -244,10 +246,9 @@ cc.Class({
                 cc.log("btn ok");
                 this.dialog_next.active = false;
                 this.node.opacity = 255;
-                this.timeLeft = 30;
+                this.timeLeft = this.INIT_TIME;
                 this.loadGame();
             } else {
-                //进入消消乐
                 cc.director.loadScene("jiyili_game_02");  
             }
         }, this);
@@ -312,7 +313,7 @@ cc.Class({
             this.audio_dida.stop();
         }
 
-        this.lb_title.string = "你失败了哦，是否再来一局？";
+        this.lb_title.string = "挑战失败了哦\n是否again?";
         if (this.timeLeft == 0) {
             this.lb_title.string = "时间到了哦！是否再来一局？";
         }
@@ -387,7 +388,7 @@ cc.Class({
             for (var i = 0; i < 4; i++) {
                 this.showCardBack(this.cards[i]);
             }
-        }, 1.5);
+        }, 3.5);
         //合并为一张卡牌
         this.scheduleOnce(function(){
             for (var i = 0; i < 4; i++) {
@@ -401,7 +402,7 @@ cc.Class({
             this.scheduleOnce(function(){
                 this.loadWrongOrLike();
             }, 0.6);
-        }, 2.5);
+        }, 4.5);
     },
 
     /**

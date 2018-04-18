@@ -179,6 +179,7 @@ cc.Class({
             this.bgm.loop = true;
         }
         
+        //this.ZI_URL = "http://192.168.31.92/";
     },
 
     /**
@@ -203,6 +204,14 @@ cc.Class({
         this.perLoad();
     },
 
+    playAudio: function(audio) {
+        this.bgm.volume = 0.2;
+        audio.play();
+        this.scheduleOnce(function(){
+            this.bgm.volume = 1;
+        }, audio.getDuration()+0.2);
+    },
+
     perLoad: function() {
         var self = this;
         this.btn_audio.node.on(cc.Node.EventType.TOUCH_END, function() {
@@ -212,7 +221,8 @@ cc.Class({
             let action1 = cc.scaleBy(0.1, 1.1 * now_scale).easing(cc.easeCubicActionOut());
             let action2 = cc.scaleTo(0.1, now_scale).easing(cc.easeCubicActionOut());
             self.btn_audio.node.runAction(cc.sequence(action1, action2));
-            self.audio[self.index-1].play();
+            //self.audio[self.index-1].play();
+            self.playAudio(self.audio[self.index-1]);
         });
 
         this.btn_forward.node.on(cc.Node.EventType.TOUCH_END, function() {
@@ -269,6 +279,16 @@ cc.Class({
             self.loadAll();
         }
         this.schedule(callback, 0.1);
+
+        //添加点击事件
+        for (let i = 1; i <= 11; i++) {
+            var zitiNode = this.layout.node.getChildByName("ziti_" + this.num2res["" + i]);
+            zitiNode.index = i;
+            zitiNode.on(cc.Node.EventType.TOUCH_END, function() {
+                self.index = this.index;
+                self.loadAll();
+            }, zitiNode);
+        }
     },
 
     /**
@@ -417,17 +437,18 @@ cc.Class({
         // webview
         this.scheduleOnce(function(){
             let url_bihua = 'resources/img/xuexi/zixing/zixing_' + this.num2res["" + this.index] + '.gif';
+            //let url_bihua = 'resources/html/' + this.num2res["" + this.index] + '.html';
             this.webview.url = cc.url.raw(url_bihua);
         }, 0.1);
 
         //layout
         if (this.curDisplayZi != null) {
             this.curDisplayZi.stopAllActions();
-            this.curDisplayZi.setScale(1);
+            //this.curDisplayZi.setScale(1);
         }
         var zitiNode = this.layout.node.getChildByName("ziti_" + this.num2res["" + this.index]);
         //zitiNode.setScale(1.5);
-        zitiNode.runAction(cc.scaleTo(0.15, 1.5));
+        //zitiNode.runAction(cc.scaleTo(0.15, 1.5));
         this.curDisplayZi = zitiNode;
         this.bg_quan.setPosition(zitiNode.x, this.layout.node.y);
     },

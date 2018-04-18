@@ -139,7 +139,9 @@ cc.Class({
         this.cardsChoose = [];
         this.cardsNotice = [];
 
-        this.timeLeft = 30;
+        this.timeLeft = 40;
+        this.INIT_TIME = 40;
+
         this.pass = false;
 
         this.curChooseIndex = 0;
@@ -168,6 +170,7 @@ cc.Class({
         });
 
         this.lb_coin.string = "+" + this.getCoin();
+        this.lb_time.string = (this.timeLeft + " s");
 
         this.game_info.active = true;
         this.node.opacity = 120;
@@ -269,6 +272,7 @@ cc.Class({
         // 4张图片全部点击后，翻转显示背面，合为一张图片
         // 重新显示8张图片，显示背面，再翻转显示正面
         // 点击事件，选出一开始显示的4张图
+        this.timeLeft = this.INIT_TIME;
         this.unscheduleAllCallbacks();
         this.lb_time.string = (this.timeLeft + " s");
         this.curChooseIndex = 0;
@@ -321,7 +325,7 @@ cc.Class({
             this.audio_dida.stop();
         }
 
-        this.lb_title.string = "你失败了哦，是否再来一局？";
+        this.lb_title.string = "挑战失败了哦\n是否again?";
         if (this.timeLeft == 0) {
             this.lb_title.string = "时间到了哦！是否再来一局？";
         }
@@ -387,7 +391,7 @@ cc.Class({
         // }
         this.scheduleOnce(function(){
             self.checkShowAllDone();
-        }, 4.5);
+        }, 5.5);
     },
 
     

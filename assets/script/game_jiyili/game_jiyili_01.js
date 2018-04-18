@@ -133,6 +133,8 @@ cc.Class({
         this.leftCardsNum = 8;
         this.pass = false;
 
+        this.INIT_TIME = 40;
+
         this.cardScaleX = 0.2;
 
         // 判断音效
@@ -172,6 +174,7 @@ cc.Class({
         });
 
         this.lb_coin.string = "+" + this.getCoin();
+        this.lb_time.string = (this.INIT_TIME + " s");
 
         this.game_info.active = true;
         this.node.opacity = 120;
@@ -226,11 +229,23 @@ cc.Class({
                 this.leftCardsNum = 8;
                 this.loadGame(1, this.type);
             } else {
-                if (this.getGameMode() == "richang") {
-                    cc.director.loadScene("richang_level");   
-                } else {
-                    cc.director.loadScene("qimo_level");   
-                } 
+                // 重来
+                this.node.opacity = 255;
+                this.dialog_yes_no.active = false;
+
+                this.timeLeft = 30;
+                for (let i = 0; i < this.cards.length; i++) {
+                    this.cards[i].destroy();
+                }
+                this.cardsNotice = []; //添加的钩
+                this.cardsChoose = []; //选择的卡牌
+                this.leftCardsNum = 8;
+                this.loadGame(1, this.type);
+                // if (this.getGameMode() == "richang") {
+                //     cc.director.loadScene("richang_level");   
+                // } else {
+                //     cc.director.loadScene("qimo_level");   
+                // } 
             }
         }, this);
 
@@ -267,7 +282,7 @@ cc.Class({
         if (this.audio_dida.isPlaying) {
             this.audio_dida.stop();
         }
-        this.dialog_title.string = "时间到了哦！是否再来一局？";
+        this.dialog_title.string = "挑战失败了哦\n是否again?";
         this.node.opacity = 120;
         this.dialog_yes_no.active = true;
         //
@@ -288,6 +303,8 @@ cc.Class({
         let self = this;
         let baseUrl1 = "";
         let baseUrl2 = "";
+
+        this.timeLeft = this.INIT_TIME;
 
         this.lb_time.string = (this.timeLeft + " s");
 

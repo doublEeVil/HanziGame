@@ -516,8 +516,8 @@
     "_scaleY": 0.5,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": -53,
-      "y": 120
+      "x": -70,
+      "y": 83
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -595,7 +595,7 @@
     "_position": {
       "__type__": "cc.Vec2",
       "x": -199,
-      "y": 122
+      "y": 85
     },
     "_skewX": 0,
     "_skewY": 0,
@@ -3625,7 +3625,7 @@
     "_contentSize": {
       "__type__": "cc.Size",
       "width": 520,
-      "height": 80
+      "height": 120
     },
     "_rotationX": 0,
     "_rotationY": 0,
@@ -3654,12 +3654,12 @@
     "_useOriginalSize": false,
     "_actualFontSize": 40,
     "_fontSize": 40,
-    "_lineHeight": 40,
+    "_lineHeight": 60,
     "_enableWrapText": true,
     "_N$file": null,
     "_isSystemFontUsed": true,
     "_spacingX": 0,
-    "_N$string": "恭喜你完成汉字达人学习部分\n下一环节记忆大挑战",
+    "_N$string": "恭喜你完成第7课的汉字学习\n下一环节记忆大挑战",
     "_N$horizontalAlign": 1,
     "_N$verticalAlign": 1,
     "_N$fontFamily": "Arial",

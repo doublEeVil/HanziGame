@@ -126,6 +126,8 @@ cc.Class({
         this.INIT_AIM_NUM = 8;
         this.aim_num = this.INIT_AIM_NUM;
 
+        this.isGameOver = true;
+
         // 判断音效
         if (cc.sys.localStorage.getItem("bgm") == "off") {
             this.bgm.stop();
@@ -190,25 +192,29 @@ cc.Class({
     },
 
     gameSuccess: function() {
+        this.isGameOver = true;
+
         // 停止音乐
         if (this.audio_dida.isPlaying) {
             this.audio_dida.stop();
         }
         this.node.opacity = 100;
         this.dialog.active = true;
-        this.lb_title.string = "恭喜你，挑战成功\n是否再来一次";
+        this.lb_title.string = "恭喜你完成捕鱼任务\n再来一次？";
         this.node.off(cc.Node.EventType.TOUCH_END);
         this.unscheduleAllCallbacks();
     },
 
     gameFail: function() {
+        this.isGameOver = true;
+
         // 停止音乐
         if (this.audio_dida.isPlaying) {
             this.audio_dida.stop();
         }
         this.node.opacity = 100;
         this.dialog.active = true;
-        this.lb_title.string = "你失败了哦\n是否再来一次";
+        this.lb_title.string = "挑战失败了哦\n是否again?";
         this.node.off(cc.Node.EventType.TOUCH_END);
         this.unscheduleAllCallbacks();
     },
@@ -260,17 +266,37 @@ cc.Class({
         let ani = this.card[rand];
         this.aimCard = cc.instantiate(ani);
         this.node.addChild(this.aimCard);
-        this.aimCard.runAction(cc.fadeOut(2.5).easing(cc.easeCubicActionIn()));
-        cc.log(this.aimCard.x + " : " + this.aimCard.y);
+        this.scheduleOnce(function(){
+            let action = cc.spawn(cc.moveTo(2, 150, 260), cc.scaleTo(2, 0.1, 0.1));
+            this.aimCard.runAction(action);
+        }, 1);
+        
         this.aimCard.setPosition(0,0);
         this.aim_type = this.getPerfabType(ani);
         this.scheduleOnce(function() {
-            this.aimCard.destroy();
+            //this.aimCard.destroy();
+
+            this.aimCard.on(cc.Node.EventType.TOUCH_START, function(){
+                this.setPosition(0,0);
+                this.setScale(0.5);
+            }, this.aimCard);
+
+            this.aimCard.on(cc.Node.EventType.TOUCH_END, function(){
+                this.setPosition(150, 260);
+                this.setScale(0.1);
+            }, this.aimCard);
+
+            this.aimCard.on(cc.Node.EventType.TOUCH_CANCEL, function(){
+                this.setPosition(150, 260);
+                this.setScale(0.1);
+            }, this.aimCard);
+
             //2. 布局渔
             this.game_start = false;
             this.yu_num = this.YU_MAX_NUM;
-            let yu;
+            
             for (let i = 0; i < this.yu_num; i++) {
+                let yu;
                 rand = this.getRand(24);
                 if (this.getGameMode() == "richang") {
                     rand = this.getRand(32)
@@ -278,23 +304,39 @@ cc.Class({
                 yu = cc.instantiate(this.aniYu[rand]);
                 yu.type = this.getPerfabType(this.aniYu[rand]);
                 yu.direction = this.getDirection(rand);
+                yu.index = rand;
+                yu.initSpeed = cc.random0To1() * 2; 
+                yu.setGlobalZOrder(-1);
+                yu.count = 0;
+
                 if (yu.direction == "left") {
-                    yu.x = this.getRand(1800) + 560;
-                    yu.y = this.getRand(560) - 350;
+                    //yu.x = this.getRand(1800) + 560;
+                    yu.x = 1800 / this.yu_num * i + 560;
+                    yu.y = this.getRand(560) - 350;                   
                 } else {
-                    yu.x = -this.getRand(1800) - 560;
+                    //yu.x = -this.getRand(1800) - 560;
+                    yu.x = -1800 / this.yu_num * i - 560;
                     yu.y = this.getRand(560) - 350;
                 }
-
-                
+               
                 this.node.addChild(yu);
                 this.allyu.push(yu);
             }
             this.game_start = true;
             //3. 添加点击事件
             this.addCallBack(this.node);
+            this.isGameOver = false;
         }, 3);
+        
+        
+    },
 
+    playAudio: function(audio) {
+        this.bgm.volume = 0.2;
+        audio.play();
+        this.scheduleOnce(function(){
+            this.bgm.volume = 1;
+        }, audio.getDuration()+0.2);
     },
 
     /**
@@ -320,13 +362,17 @@ cc.Class({
                 if (Math.abs(yu.x - boomObj.x) < 40 && Math.abs(yu.y - boomObj.y) < 40) {
                     // 增加发音
                     if (cc.sys.localStorage.getItem("audio") != "off") {
-                        self.audio_zi[self.type2fayin[yu.type]].play();
+                        //self.audio_zi[self.type2fayin[yu.type]].play();
+                        self.playAudio(self.audio_zi[self.type2fayin[yu.type]]);
                     }
                     
                     if (yu.type != self.aim_type) {
                         return;
                     }
-
+                    yu.count++;
+                    if (yu.count < 3) {
+                        return;
+                    }
                     self.addYuanbao(1);
                     self.lb_yuanbao.string = self.getYuanbao();
                     self.aim_num--;
@@ -357,18 +403,23 @@ cc.Class({
     },
 
     update (dt) {
+        if (this.isGameOver) {
+            return;
+        }
         // 移动鱼
         let yu;
         let rand;
         for (let i = 0; i < this.allyu.length; i++) {
             yu = this.allyu[i];
-            if (yu.type == "fan" || yu.type == "chi" || yu.type == "jiu") {
-                rand = 3.5;
-            } else if (yu.type == "tang" || yu.type == "he") {
-                rand = 2.5;
-            } else {
-                rand = 1.5;
-            }
+            // if (yu.type == "fan" || yu.type == "chi" || yu.type == "jiu") {
+            //     rand = 5.5;
+            // } else if (yu.type == "tang" || yu.type == "he") {
+            //     rand = 4.5;
+            // } else {
+            //     rand = 3.5;
+            // }
+            rand = yu.index / 20 + 3 + yu.initSpeed;
+
             if (yu.direction == "left") {
                 yu.x = yu.x - rand;
             } else {
@@ -378,11 +429,11 @@ cc.Class({
         // 消除鱼， 同时生成新的鱼
         for (let i = 0; i < this.allyu.length; i++) {
             yu = this.allyu[i];
-            if (yu.direction == "left" && yu.x < - 1136/2 - 20) {
+            if (yu.direction == "left" && yu.x < - 1136/2 - 200) {
                 this.removeArray(this.allyu, yu);
                 yu.destroy();
             } 
-            if (yu.direction == "right" && yu.x > 1136/2 + 40) {
+            if (yu.direction == "right" && yu.x > 1136/2 + 200) {
                 this.removeArray(this.allyu, yu);
                 yu.destroy();
             }
@@ -407,6 +458,9 @@ cc.Class({
                 yu = cc.instantiate(this.aniYu[rand]);
             }
             yu.direction = this.getDirection(rand);
+            yu.index = rand;
+            yu.initSpeed = cc.random0To1() * 2; 
+            yu.count = 0;
             if (yu.direction == "left") {
                 yu.x = this.getRand(500) + 640;
                 yu.y = this.getRand(560) - 350;
@@ -415,8 +469,11 @@ cc.Class({
                 yu.y = this.getRand(560) - 350;
             }
             yu.type = this.getPerfabType(this.aniYu[rand]);
+            yu.setGlobalZOrder(-1);
+            
             this.allyu.push(yu);
             this.node.addChild(yu);
+
         }
 
     },

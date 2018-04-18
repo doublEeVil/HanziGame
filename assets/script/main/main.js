@@ -62,6 +62,16 @@ cc.Class({
             default: null,
             type: cc.Label
         },
+
+        btn_zhaoguilv: {
+            default: null,
+            type: cc.Node
+        },
+
+        btn_caigeci: {
+            default: null,
+            type: cc.Node
+        }
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -88,6 +98,43 @@ cc.Class({
 
         this.btn_myinfo.on(cc.Node.EventType.TOUCH_END, function() {
             cc.director.loadScene("myinfo");
+        });
+
+
+        this.btn_zhaoguilv.on(cc.Node.EventType.TOUCH_END, function() {
+            self.loading.node.active = true;
+            self.node.opacity = 50;
+
+            cc.loader.onProgress = function (num, total, item) {
+                cc.log(num, total);
+                self.loading.progress = num / total;
+                if (num == total) { 
+                    cc.director.loadScene("zhaoguilv");
+                    cc.loader.onProgress = function(){}
+                }
+            }
+
+            cc.director.preloadScene("zhaoguilv", function() {
+
+            });
+        });
+
+        this.btn_caigeci.on(cc.Node.EventType.TOUCH_END, function() {
+            self.loading.node.active = true;
+            self.node.opacity = 50;
+
+            cc.loader.onProgress = function (num, total, item) {
+                cc.log(num, total);
+                self.loading.progress = num / total;
+                if (num == total) { 
+                    cc.director.loadScene("caigeci");
+                    cc.loader.onProgress = function(){}
+                }
+            }
+
+            cc.director.preloadScene("caigeci", function() {
+
+            });
         });
 
         this.btn_richang.on(cc.Node.EventType.TOUCH_END, function() {

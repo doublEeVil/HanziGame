@@ -611,7 +611,7 @@
     },
     "_contentSize": {
       "__type__": "cc.Size",
-      "width": 400,
+      "width": 600,
       "height": 120
     },
     "_rotationX": 0,
@@ -768,6 +768,9 @@
     },
     "btn_back": {
       "__id__": 5
+    },
+    "lb_team": {
+      "__id__": 12
     }
   },
   {

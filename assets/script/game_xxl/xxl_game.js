@@ -150,13 +150,32 @@ cc.Class({
         goal_node: {
             default: null,
             type: cc.Node
-        }
+        },
+
+        btn_task1: {
+            default: null,
+            type: cc.Node
+        },
+
+        btn_task2: {
+            default: null,
+            type: cc.Node
+        },
+
+        btn_task3: {
+            default: null,
+            type: cc.Node
+        },
     },
 
     onLoad () {
+        this.X_NUM = 7; //多少列
+        this.Y_NUM = 6; //多少行
+        this.CELL_SIZE = 80;
+
         this.showIce = [];
         this.objs = [];
-        this.startX = -210;
+        this.startX = -230;
         this.startY = -210;
 
         this.timeLeft = 120;
@@ -174,7 +193,7 @@ cc.Class({
 
         this.level = 1;
 
-        this.info_msg = ["3个连成一起\n就可以消除元素\n每个环节你需要消除不同的目标"];
+        this.info_msg = ["3个连成一起\n就可以消除元素\n每个环节你需要消除不同的目标\nslide ro exhange the iceblocks\nlink three same iceblocks together"];
 
         // 判断音效
         if (cc.sys.localStorage.getItem("bgm") == "off") {
@@ -190,11 +209,12 @@ cc.Class({
         this.btn_back.on(cc.Node.EventType.TOUCH_END, function() {
             cc.log("btn_start pressed");
             //this.destroy();
-            if (self.getGameMode() == "richang") {
-                cc.director.loadScene("richang_level");
-            } else {
-                cc.director.loadScene("qimo_level");
-            }
+            // if (self.getGameMode() == "richang") {
+            //     cc.director.loadScene("richang_level");
+            // } else {
+            //     cc.director.loadScene("qimo_level");
+            // }
+            cc.director.loadScene("choose");
         });
 
         this.btn_ok.on(cc.Node.EventType.TOUCH_END, function(){
@@ -238,6 +258,45 @@ cc.Class({
             this.lb_about.string = this.info_msg[0];
         }, this);
 
+        // 一进入游戏的按钮
+        self.btn_task1.setScale(1.1);
+        self.btn_task1.setColor(new cc.Color(235,123,67));
+        self.btn_task2.setScale(1.0);
+        self.btn_task2.setColor(new cc.Color(255,255,255));
+        self.btn_task3.setScale(1.0);
+        self.btn_task3.setColor(new cc.Color(255,255,255));
+
+        this.btn_task1.on(cc.Node.EventType.TOUCH_END, function() {
+            self.btn_task1.setScale(1.1);
+            self.btn_task1.setColor(new cc.Color(235,123,67));
+            self.btn_task2.setScale(1.0);
+            self.btn_task2.setColor(new cc.Color(255,255,255));
+            self.btn_task3.setScale(1.0);
+            self.btn_task3.setColor(new cc.Color(255,255,255));
+            self.level = 1;
+            self.loadGame();
+        });
+        this.btn_task2.on(cc.Node.EventType.TOUCH_END, function() {
+            self.btn_task2.setScale(1.1);
+            self.btn_task2.setColor(new cc.Color(235,123,67));
+            self.btn_task1.setScale(1.0);
+            self.btn_task1.setColor(new cc.Color(255,255,255));
+            self.btn_task3.setScale(1.0);
+            self.btn_task3.setColor(new cc.Color(255,255,255));
+            self.level = 3;
+            self.loadGame();
+        });
+        this.btn_task3.on(cc.Node.EventType.TOUCH_END, function() {
+            self.btn_task3.setScale(1.1);
+            self.btn_task3.setColor(new cc.Color(235,123,67));
+            self.btn_task2.setScale(1.0);
+            self.btn_task2.setColor(new cc.Color(255,255,255));
+            self.btn_task1.setScale(1.0);
+            self.btn_task1.setColor(new cc.Color(255,255,255));
+            self.level = 5;
+            self.loadGame();
+        });
+
         this.loadGame();
     },
 
@@ -262,8 +321,23 @@ cc.Class({
         this.canvas.opacity = 255;
 
         // 初始化数据
+        this.goal_node.stopAllActions();
+        if (this.INIT_GOAL_NODE_X == null) {
+            this.INIT_GOAL_NODE_X = this.goal_node.x;
+            this.INIT_GOAL_NODE_Y = this.goal_node.y;
+        }
+        this.goal_node.x = this.INIT_GOAL_NODE_X;
+        this.goal_node.y = this.INIT_GOAL_NODE_Y;
+
         this.unscheduleAllCallbacks();
         this.timeLeft = this.INIT_TIME;
+        
+        if (this.level % 2 == 0) {
+            this.timeLeft = 100;
+        } else {
+            this.timeLeft = 60;
+        }
+
         this.done_num = 0;
         this.done_num_2 = 0;
 
@@ -271,8 +345,8 @@ cc.Class({
         this.node.off(cc.Node.EventType.TOUCH_END);
 
         if (this.objs != null && this.objs.length != 0) {
-            for (let x = 0; x < 7; x++) {
-                for (let y = 0; y < 7; y++) {
+            for (let x = 0; x < this.X_NUM; x++) {
+                for (let y = 0; y < this.Y_NUM; y++) {
                     this.objs[x][y].destroy();
                     this.objs[x][y] = null;
                 }
@@ -413,16 +487,17 @@ cc.Class({
             //1. 摆好 7 * 7的
             let rand;
 
-            for (let x = 0; x < 7; x++) {
+            for (let x = 0; x < this.X_NUM; x++) {
                 let arrY = [];
-                for (let y = 0; y < 7; y++) {
+                for (let y = 0; y < this.Y_NUM; y++) {
                     rand = this.getRand(5);
                     var obj = cc.instantiate(this.showIce[rand]);
-                    obj.x = this.startX + (x * 70);
-                    obj.y = this.startY + (y * 70);
+                    obj.x = this.startX + (x * this.CELL_SIZE);
+                    obj.y = this.startY + (y * this.CELL_SIZE);
                     obj.type = rand;
                     obj.indexX = x;
                     obj.indexY = y;
+                    obj.setScale(70/60); //TODO -----
                     this.node.addChild(obj);
                     arrY[y] = obj;
                 }
@@ -435,6 +510,9 @@ cc.Class({
             let arr = this.checkCanDestroy();
             var callback = function() {
                 //this.removeCallback();
+                if (arr == null) {
+                    return;
+                }
                 if (arr.length >= 3) {
                     this.scheduleOnce(function() {
                         this.destroyObj(arr);
@@ -534,26 +612,49 @@ cc.Class({
     },
 
     /**
+     * 漂字
+     */
+    piaozi: function(str, x, y) {
+        console.log("++++")
+        var node =new cc.Node("node");
+        var label=node.addComponent(cc.Label);
+        label.string=str;
+        var color=new cc.Color(255,0, 0);
+        node.position=cc.p(x, y);
+        node.color=color;
+        this.node.addChild(node)
+        this.scheduleOnce(function() {
+            if (node != null) {
+                node.destroy();
+            }
+        }, 2);
+        node.runAction(cc.spawn(cc.moveTo(0.5, x, y + 100), cc.fadeOut(0.5)));
+    },
+
+    /**
      * 添加点击事件
      */
     addCallBack: function(obj) {
         let self = this;
         obj.on(cc.Node.EventType.TOUCH_START, function(event) {
             var delta = event.touch.getDelta();
-            obj.startTouchX = event.touch._startPoint.x;
-            obj.startTouchY = event.touch._startPoint.y;
-            let x = parseInt(obj.startTouchX / 70);
-            let y = parseInt(obj.startTouchY / 70);
-            x = 0 ? 1 : x;
-            y = 0 ? 1 : y;
-            self.touchObj = self.objs[x-1][y-1];
+            obj.startTouchX = event.touch._startPoint.x - 50; //偏移量调整
+            obj.startTouchY = event.touch._startPoint.y - 50;
+            let x = parseInt(obj.startTouchX / self.CELL_SIZE);
+            let y = parseInt(obj.startTouchY / self.CELL_SIZE);
+            //console.log(parseInt(obj.startTouchX), parseInt(obj.startTouchY))
+            console.log(x, y);
+            // x = (x <= 0 ? 1 : x);
+            // y = (y <= 0 ? 1 : y);
+            self.touchObj = self.objs[x][y];
         });
 
         obj.on(cc.Node.EventType.TOUCH_END, function(event) {
-            obj.endTouchX = event.touch._point.x;
-            obj.endTouchY = event.touch._point.y;
+            obj.endTouchX = event.touch._point.x - 50; //偏移量调整
+            obj.endTouchY = event.touch._point.y - 50;
+            console.log(obj.endTouchX, obj.endTouchY);
             // 判断移动
-            let dx = obj.endTouchX - obj.startTouchX;
+            let dx = obj.endTouchX - obj.startTouchX; 
             let dy = obj.endTouchY - obj.startTouchY;
             if (Math.abs(Math.abs(dx) - Math.abs(dy)) < 10 ) {
                 return;
@@ -561,7 +662,7 @@ cc.Class({
             if (Math.abs(dx) < 20 && Math.abs(dy) < 20) {
                 return;
             }
-            if (Math.abs(dx) > 120 && Math.abs(dy) > 120) {
+            if (Math.abs(dx) > 150 && Math.abs(dy) > 150) {
                 return;
             }
             let num;
@@ -582,6 +683,7 @@ cc.Class({
                     num = 2;
                 }
             }
+            console.log(num, dx, dy);
             self.checkCanMove(self.touchObj, num);
         });
     },
@@ -622,6 +724,9 @@ cc.Class({
         // 否则，回到原位
         let canDestroy = this.checkCanDestroy();
         //cc.log(canDestroy);
+        if (canDestroy == null) {
+            return
+        }
         if (canDestroy.length < 3) {
             this.scheduleOnce(function() {
                 this.swap(obj, tObj);
@@ -660,17 +765,29 @@ cc.Class({
                 this.done_num++;
                 this.lb_done.string = "已经完成" + this.done_num + "个";
 
-                this.addCoin(1);
+                this.addCoin(10);
                 this.lb_coin.string = "+" + this.getCoin();
+                //漂字
+                this.piaozi("+10", 0, 0)
             }
             if (this.level % 2 == 0) {
                 if (arr[i].type == this.aim_type_2) {
                     this.done_num_2++;
                     this.lb_done_2.string = "已经完成" + this.done_num_2 + "个";
-                    this.addCoin(1);
+                    this.addCoin(10);
+                    //漂字
+                    this.piaozi("+10", 0, 0)
                     this.lb_coin.string = "+" + this.getCoin();
                 }
             }
+            // 非目标消除，+1
+            if (arr[i].type != this.aim_type && arr[i].type != this.aim_type_2) {
+                this.addCoin(1);
+                //漂字
+                this.piaozi("+1", 0, 0)
+                this.lb_coin.string = "+" + this.getCoin();
+            }
+
             self.objs[arr[i].indexX][arr[i].indexY] = null;
             self.crashObj(arr[i]);
         }
@@ -687,21 +804,21 @@ cc.Class({
      * 重新刷新界面
      */
     refresh: function() {
-        for (let x = 0; x < 7; x++) {
-            for (let y = 0; y < 7; y++) {
+        for (let x = 0; x < this.X_NUM; x++) {
+            for (let y = 0; y < this.Y_NUM; y++) {
                 if (this.objs[x][y] != null) {
                     continue;
                 }
                 //把上面的非空下落
-                for (let cy = y + 1; cy < 7; cy++) {
+                for (let cy = y + 1; cy < this.Y_NUM; cy++) {
                     if (this.objs[x][cy] != null) {
                         let tNode = this.objs[x][cy];
                         tNode.indexX = x;
                         tNode.indexY = y;
                         this.objs[x][cy] = null;
                         this.objs[x][y] = tNode;
-                        let moveX = this.startX + (x * 70);
-                        let moveY = this.startY + (y * 70);
+                        let moveX = this.startX + (x * this.CELL_SIZE);
+                        let moveY = this.startY + (y * this.CELL_SIZE);
                         tNode.runAction(cc.moveTo(0.3, moveX, moveY));
                         break;
                     }
@@ -709,20 +826,21 @@ cc.Class({
             }
         }
         // 填充空白
-        for (let x = 0; x < 7; x++) {
-            for (let y = 0; y < 7; y++) {
+        for (let x = 0; x < this.X_NUM; x++) {
+            for (let y = 0; y < this.Y_NUM; y++) {
                 if (this.objs[x][y] != null) {
                     continue;
                 }
                 let rand = this.getRand(4);
                 var obj = cc.instantiate(this.showIce[rand]);
-                let posX = this.startX + (x * 70);
-                let posY = this.startY + (y * 70);
+                let posX = this.startX + (x * this.CELL_SIZE);
+                let posY = this.startY + (y * this.CELL_SIZE);
                 obj.type = rand;
                 obj.indexX = x;
                 obj.indexY = y;
                 obj.x = posX;
                 obj.y = 700;
+                obj.setScale(70/60); //TODO ----
                 this.node.addChild(obj);
                 this.objs[x][y] = obj;
                 obj.runAction(cc.moveTo(0.3, posX, posY));
@@ -744,20 +862,20 @@ cc.Class({
         let arr = [];
         // 检测消除算法
         // 1. 构建全部图
-        for (let x = 0; x < 7; x++) {
-            for (let y = 0; y < 7; y++) {
+        for (let x = 0; x < this.X_NUM; x++) {
+            for (let y = 0; y < this.Y_NUM; y++) {
                 //cc.log(x + " " + y + " " + this.objs[x][y])
                 if (this.objs[x][y] == null) {
                     // 暂时先这么做，防止卡死
                     return;
                 }
-                if (x < 6) {
+                if (x < this.X_NUM - 1) {
                     this.objs[x][y].right = this.objs[x+1][y];
                 }
                 if (x > 0) {
                     this.objs[x][y].left = this.objs[x-1][y];
                 }
-                if (y < 6) {
+                if (y < this.Y_NUM - 1) {
                     this.objs[x][y].up = this.objs[x][y+1];
                 }
                 if (y > 0) {
@@ -767,8 +885,8 @@ cc.Class({
         }
 
         // 2. 检测消除对象       
-        for (let x = 0; x < 7; x++) {
-            for (let y = 0; y < 7; y++) {
+        for (let x = 0; x < this.X_NUM; x++) {
+            for (let y = 0; y < this.Y_NUM; y++) {
                 // 检测横是否
                 let xi = 1;
                 let curObj = this.objs[x][y];
@@ -836,10 +954,10 @@ cc.Class({
         objB.indexX = tx;
         objB.indexY = ty;
 
-        let ax = this.startX + (objA.indexX * 70);
-        let bx = this.startX + (objB.indexX * 70);
-        let ay = this.startY + (objA.indexY * 70);
-        let by = this.startY + (objB.indexY * 70);
+        let ax = this.startX + (objA.indexX * this.CELL_SIZE);
+        let bx = this.startX + (objB.indexX * this.CELL_SIZE);
+        let ay = this.startY + (objA.indexY * this.CELL_SIZE);
+        let by = this.startY + (objB.indexY * this.CELL_SIZE);
 
         objA.runAction(cc.moveTo(0.2, ax, ay));
         objB.runAction(cc.moveTo(0.2, bx, by));

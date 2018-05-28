@@ -88,6 +88,26 @@ cc.Class({
             type: cc.AudioSource
         },
 
+        mp3: {
+            default: [],
+            type: cc.AudioSource
+        },
+
+        btn_task1: {
+            default: null,
+            type: cc.Node
+        },
+
+        btn_task2: {
+            default: null,
+            type: cc.Node
+        },
+
+        btn_task3: {
+            default: null,
+            type: cc.Node
+        },
+
     },
 
     onLoad () {
@@ -128,11 +148,18 @@ cc.Class({
             "112":"resources/img/jiyili/card_like/card_like_tang.png",
             "113":"resources/img/jiyili/card_like/card_like_wan1.png",
             "114":"resources/img/jiyili/card_like/card_like_wan2.png",
+
+            // 新增的3个
+            "115":"resources/img/jiyili/card_like/card_like_chi.png",
+            "116":"resources/img/jiyili/card_like/card_like_wu.png",
+            "117":"resources/img/jiyili/card_like/card_like_xie.png",
+
+            /*
             "115":"resources/img/jiyili/card_wrong/card_wrong_dan.png",
             "116":"resources/img/jiyili/card_wrong/card_wrong_mian.png",
             "117":"resources/img/jiyili/card_wrong/card_wrong_tang.png",
+            */
         }
-
         this.cards = [];
         this.wrongValues = []; //错误的
         this.cardsValues = []; //已选择的
@@ -158,11 +185,13 @@ cc.Class({
         this.btn_back.on(cc.Node.EventType.TOUCH_END, function() {
             cc.log("btn_start pressed");
             //this.destroy();
-            if (self.getGameMode() == "richang") {
-                cc.director.loadScene("richang_level");
-            } else {
-                cc.director.loadScene("qimo_level");
-            }
+            // if (self.getGameMode() == "richang") {
+            //     cc.director.loadScene("richang_level");
+            // } else {
+            //     cc.director.loadScene("qimo_level");
+            // }
+
+            cc.director.loadScene("choose");
         });
 
         this.lb_coin.string = "+" + this.getCoin();
@@ -175,6 +204,16 @@ cc.Class({
             this.node.opacity = 255;
             this.perLoad();
         }, this);
+      
+        this.btn_task1.on(cc.Node.EventType.TOUCH_END, function() {
+            cc.director.loadScene("jiyili_game_03");
+        });
+        this.btn_task2.on(cc.Node.EventType.TOUCH_END, function() {
+            cc.director.loadScene("jiyili_game_02");
+        });
+        this.btn_task3.on(cc.Node.EventType.TOUCH_END, function() {
+            cc.director.loadScene("jiyili_game_01");
+        });
     },
 
     reduceCoin: function(num) {
@@ -201,13 +240,32 @@ cc.Class({
         return parseInt(coin);
     },
 
+    /**
+     * 漂字
+     */
+    piaozi: function(str, x, y) {
+        console.log("++++")
+        var node =new cc.Node("node");
+        var label=node.addComponent(cc.Label);
+        label.string=str;
+        var color=new cc.Color(255,0, 0);
+        node.position=cc.p(x, y);
+        node.color=color;
+        this.node.addChild(node)
+        this.scheduleOnce(function() {
+            if (node != null) {
+                node.destroy();
+            }
+        }, 2);
+        node.runAction(cc.spawn(cc.moveTo(0.5, x, y + 100), cc.fadeOut(0.5)));
+    },
+
     perLoad: function() {
         this.btn_home.on(cc.Node.EventType.TOUCH_END, function() {
             cc.director.loadScene("choice");
         });
 
         this.btn_info.on(cc.Node.EventType.TOUCH_START, function() {
-            cc.log(this.info_msg)
             this.info_msg.setGlobalZOrder(20);
             this.info_msg.setLocalZOrder(20);
             this.info_msg.active = true;
@@ -287,8 +345,10 @@ cc.Class({
             if (!this.audio_dida.isPlaying) {
                 if (cc.sys.localStorage.getItem("audio") != "off") { 
                     // 循环播放
-                    this.audio_dida.play();
-                    this.audio_dida.loop = true;
+                    if (this.timeLeft <= 10) {
+                        this.audio_dida.play();
+                        this.audio_dida.loop = true;
+                    }
                 }
 
             }
@@ -430,7 +490,10 @@ cc.Class({
             // 显示
             for (var i = 0; i < 8; i++) {
                 this.showCardFace(this.cards[i]);
+                this.cards[i].fayin = this.getFayin(this.cards[i].value);
                 this.cards[i].on(cc.Node.EventType.TOUCH_END, function(){
+                    //添加声音
+                    self.playAudio(this);
                     if (!this.choose) {
                         self.checkGameOver(this);
                     }
@@ -466,6 +529,7 @@ cc.Class({
 
                 this.addCoin(4);
                 this.lb_coin.string = "+" + this.getCoin();
+                this.piaozi("+4", 0, 0);
 
                 // 停止音乐
                 if (this.audio_dida.isPlaying) {
@@ -484,10 +548,20 @@ cc.Class({
             let doudong = cc.sequence(a1, a2);
             let action = cc.repeat(doudong, 30); 
             card.runAction(action);
+
+            //显示正确的答案
+            for (let i = 0; i < this.cards.length; i++) {
+                if (this.cardsValues.indexOf(this.cards[i].value) != -1) {
+                    this.addRightFlag(this.cards[i]);
+                    // 一闪一闪
+                    this.cards[i].runAction(cc.blink(0.5, 4));
+                }   
+            }
+
             this.scheduleOnce(function(){
                 card.stopAllActions();
                 this.gameFail();
-            }, 0.5);
+            }, 3);
 
 
             this.reduceCoin(1);
@@ -633,5 +707,168 @@ cc.Class({
             return "richang";
         }
         return mode;
+    },
+
+    getFayin: function(num) {
+        let fayin;
+        if (num == 101) {
+            fayin = "lin2";
+        } else if (num == 102) {
+            fayin = "huai4";
+        } else if (num == 103) {
+            fayin = "tu2";
+        } else if (num == 104) {
+            fayin = "nan2";
+        } else if (num == 105) {
+            fayin = "can2";
+        } else if (num == 106) {
+            fayin = "ban3";
+        } else if (num == 107) {
+            fayin = "yin3";
+        } else if (num == 108) {
+            fayin = "ke3";
+        } else if (num == 109) {
+            fayin = "sa3";
+        } else if (num == 110) {
+            fayin = "mu4";
+        } else if (num == 111) {
+            fayin = "lai2";
+        } else if (num == 112) {
+            fayin = "yang2";
+        } else if (num == 113) {
+            fayin = "wan3";
+        } else if (num == 114) {
+            fayin = "wan4";
+        } else if (num == 115) {
+            fayin = "qi4";
+        } else if (num == 116) {
+            fayin = "niu2";
+        } else if (num == 117) {
+            fayin = "ci3";
+        } else if (num == 1) {
+            fayin = "mi";
+        } else if (num == 2) {
+            fayin = "bei";
+        } else if (num == 3) {
+            fayin = "chi";
+        } else if (num == 4) {
+            fayin = "mian";
+        } else if (num == 5) {
+            fayin = "cha";
+        } else if (num == 6) {
+            fayin = "tang";
+        } else if (num == 7) {
+            fayin = "jiu";
+        } else if (num == 8) {
+            fayin = "he";
+        } else if (num == 9) {
+            fayin = "wan";
+        } else if (num == 10) {
+            fayin = "fan";
+        } else if (num == 11) {
+            fayin = "dan";
+        } else if (num == 12) {
+            fayin = "yao";
+        } else if (num == 13) {
+            fayin = "ge";
+        } else if (num == 14) {
+            fayin = "xie";
+        } else if (num == 15) {
+            fayin = "wu";
+        } else if (num == 16) {
+            fayin = "zi";
+        } else if (num == 17) {
+            fayin = "tou";
+        } else if (num == 18) {
+            fayin = "bao";
+        } else if (num == 19) {
+            fayin = "tiao";
+        }
+        return fayin;
+    },
+
+    playAudio: function(obj) {
+        if (obj.fayin == null) {
+            return;
+        }
+        let audio;
+        let fayin = obj.fayin;
+        if (fayin == "ban3") {
+            audio = this.mp3[19];
+        } else if (fayin == "can2") {
+            audio = this.mp3[20];
+        } else if (fayin == "huai4") {
+            audio = this.mp3[21];
+        } else if (fayin == "ke3") {
+            audio = this.mp3[22];
+        } else if (fayin == "lai2") {
+            audio = this.mp3[23];
+        } else if (fayin == "lin2") {
+            audio = this.mp3[24];
+        } else if (fayin == "mu4") {
+            audio = this.mp3[25];
+        } else if (fayin == "nan2") {
+            audio = this.mp3[26];
+        } else if (fayin == "sa3") {
+            audio = this.mp3[27];
+        } else if (fayin == "tu2") {
+            audio = this.mp3[28];
+        } else if (fayin == "wan3") {
+            audio = this.mp3[29];
+        } else if (fayin == "wan4") {
+            audio = this.mp3[30];
+        } else if (fayin == "yang2") {
+            audio = this.mp3[31];
+        } else if (fayin == "yin3") {
+            audio = this.mp3[32];
+        } else if (fayin == "qi4") {
+            audio = this.mp3[35];
+        } else if (fayin == "niu2") {
+            audio = this.mp3[34];
+        } else if (fayin == "ci3") {
+            audio = this.mp3[33];
+        } else if (fayin == "bei") {
+            audio = this.mp3[0];
+        } else if (fayin == "cha") {
+            audio = this.mp3[1];
+        } else if (fayin == "chi") {
+            audio = this.mp3[2];
+        } else if (fayin == "dan") {
+            audio = this.mp3[3];
+        } else if (fayin == "fan") {
+            audio = this.mp3[4];
+        } else if (fayin == "he") {
+            audio = this.mp3[5];
+        } else if (fayin == "jiu") {
+            audio = this.mp3[6];
+        } else if (fayin == "mian") {
+            audio = this.mp3[7];
+        } else if (fayin == "mi") {
+            audio = this.mp3[8];
+        } else if (fayin == "tang") {
+            audio = this.mp3[9];
+        } else if (fayin == "wan") {
+            audio = this.mp3[10];
+        } else if (fayin == "bao") {
+            audio = this.mp3[11];
+        } else if (fayin == "yao") {
+            audio = this.mp3[12];
+        } else if (fayin == "ge") {
+            audio = this.mp3[13];
+        } else if (fayin == "xie") {
+            audio = this.mp3[14];
+        } else if (fayin == "wu") {
+            audio = this.mp3[15];
+        } else if (fayin == "zi") {
+            audio = this.mp3[16];
+        } else if (fayin == "tou") {
+            audio = this.mp3[17];
+        } else if (fayin == "tiao") {
+            audio = this.mp3[18];
+        }
+        if (audio == null) {
+            return;
+        }
+        audio.play();
     }
 });

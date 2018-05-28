@@ -106,7 +106,28 @@ cc.Class({
         btn_back: {
             default: null,
             type: cc.Node
-        }
+        },
+
+        mp3: {
+            default: [],
+            type: cc.AudioSource
+        },
+
+        btn_task1: {
+            default: null,
+            type: cc.Node
+        },
+
+        btn_task2: {
+            default: null,
+            type: cc.Node
+        },
+
+        btn_task3: {
+            default: null,
+            type: cc.Node
+        },
+
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -166,11 +187,13 @@ cc.Class({
         this.btn_back.on(cc.Node.EventType.TOUCH_END, function() {
             cc.log("btn_start pressed");
             //this.destroy();
-            if (self.getGameMode() == "richang") {
-                cc.director.loadScene("richang_level");
-            } else {
-                cc.director.loadScene("qimo_level");
-            }
+            // if (self.getGameMode() == "richang") {
+            //     cc.director.loadScene("richang_level");
+            // } else {
+            //     cc.director.loadScene("qimo_level");
+            // }
+
+            cc.director.loadScene("choose");
         });
 
         this.lb_coin.string = "+" + this.getCoin();
@@ -183,6 +206,16 @@ cc.Class({
             this.node.opacity = 255;
             this.perLoad();
         }, this);
+      
+        this.btn_task1.on(cc.Node.EventType.TOUCH_END, function() {
+            cc.director.loadScene("jiyili_game_03");
+        });
+        this.btn_task2.on(cc.Node.EventType.TOUCH_END, function() {
+            cc.director.loadScene("jiyili_game_02");
+        });
+        this.btn_task3.on(cc.Node.EventType.TOUCH_END, function() {
+            cc.director.loadScene("jiyili_game_01");
+        });
     },
 
     setCoin: function(coin) {
@@ -196,6 +229,27 @@ cc.Class({
         }
         coin = cc.sys.localStorage.getItem("coin");
         return parseInt(coin);
+    },
+
+
+    /**
+     * 漂字
+     */
+    piaozi: function(str, x, y) {
+        console.log("++++")
+        var node =new cc.Node("node");
+        var label=node.addComponent(cc.Label);
+        label.string=str;
+        var color=new cc.Color(255,0, 0);
+        node.position=cc.p(x, y);
+        node.color=color;
+        this.node.addChild(node)
+        this.scheduleOnce(function() {
+            if (node != null) {
+                node.destroy();
+            }
+        }, 2);
+        node.runAction(cc.spawn(cc.moveTo(0.5, x, y + 100), cc.fadeOut(0.5)));
     },
 
     perLoad: function() {
@@ -300,6 +354,8 @@ cc.Class({
      * type为模式 1：汉字-图片 2：汉字-拼音 3：拼音-图片 4：汉字-拼音-图片
      */
     loadGame: function(num, type) {
+        this.game_type = type;
+
         let self = this;
         let baseUrl1 = "";
         let baseUrl2 = "";
@@ -387,8 +443,10 @@ cc.Class({
             if (!this.audio_dida.isPlaying) {
                 if (cc.sys.localStorage.getItem("audio") != "off") { 
                     // 循环播放
-                    this.audio_dida.play();
-                    this.audio_dida.loop = true;
+                    if (this.timeLeft <= 10) {
+                        this.audio_dida.play();
+                        this.audio_dida.loop = true;
+                    }
                 }
 
             }
@@ -416,6 +474,14 @@ cc.Class({
                     this.choose = true;
                     //self.addRightFlag(this);
                     self.checkGameOver(this);
+
+                    // 发音
+                    if (self.game_type == 1 || self.game_type == 2) {
+                        if (this.i < 4) {
+                            self.getAudio(this.value);
+                        }
+                    }
+
                 }
             }, this.cards[i]);
         }
@@ -596,6 +662,39 @@ cc.Class({
             return "richang";
         }
         return mode;
-    }
+    },
+
+    getAudio: function(i) {
+        let audio;
+        if (i == "1") {
+            audio = this.mp3[8];
+        } else if (i == "2") {
+            audio = this.mp3[0];
+        } else if (i == "3") {
+            audio = this.mp3[2];
+        } else if (i == "4") {
+            audio = this.mp3[7];
+        } else if (i == "5") {
+            audio = this.mp3[1];
+        } else if (i == "6") {
+            audio = this.mp3[9];
+        } else if (i == "7") {
+            audio = this.mp3[6];
+        } else if (i == "8") {
+            audio = this.mp3[5];
+        } else if (i == "9") {
+            audio = this.mp3[10];
+        } else if (i == "10") {
+            audio = this.mp3[4];
+        } else if (i == "11") {
+            audio = this.mp3[3];
+        }
+        if (audio == null) {
+            return;
+        }
+        audio.play();
+    },
+
+    
     // update (dt) {},
 });

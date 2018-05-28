@@ -396,7 +396,7 @@
     "_scaleY": 1,
     "_position": {
       "__type__": "cc.Vec2",
-      "x": -126,
+      "x": 1,
       "y": 0
     },
     "_skewX": 0,
@@ -11959,7 +11959,7 @@
       }
     ],
     "_tag": -1,
-    "_active": true,
+    "_active": false,
     "_components": [],
     "_prefab": null,
     "_id": "78SN6emu1MArdCnMobC4Ws",

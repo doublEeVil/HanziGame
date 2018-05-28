@@ -189,7 +189,8 @@ cc.Class({
      */
     start () {
         this.btn_back.on(cc.Node.EventType.TOUCH_END, function(){
-            cc.director.loadScene("qimo_level");
+            //cc.director.loadScene("qimo_level");
+            cc.director.loadScene("choose");
         });
 
         // this.node.opacity = 100;
@@ -352,6 +353,9 @@ cc.Class({
         ///
         var self = this;
         //this.lb_pinyin.getComponent("PinYinLabel").pinyinString = this.num2hanzi["" + this.index];
+
+        //同时发声
+        self.playAudio(self.audio[self.index-1]);
 
         let url_pinyin = 'resources/img/xuexi/pinyin/pinyin_' + this.num2res["" + this.index] + '.png';
         if (null == this.pinyin) {

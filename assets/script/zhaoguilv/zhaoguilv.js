@@ -35,6 +35,11 @@ cc.Class({
         btn_back: {
             default: null,
             type: cc.Node
+        },
+
+        lb_team: {
+            default: null,
+            type: cc.Label
         }
     },
 
@@ -49,8 +54,9 @@ cc.Class({
         }
 
         this.lb_ch = [];
-
-        
+                
+        this.arr_right = ['河','江','湖','海','洋','浪','溪','汤',
+                            '汁','酒','汗','泪','洗'];
     },
 
     start () {
@@ -102,13 +108,37 @@ cc.Class({
         this.dialog.active = false;
         this.node.opacity = 255;
 
-        for (let i = 0; i < 3; i++) {
+        let rand = parseInt(cc.random0To1() * this.arr_right.length);
+        this.right_word = this.arr_right[rand];
+
+        // 定义要显示的字
+        let str = "";
+        for (let i = 0; i < this.arr_right.length; i++) {
+            if (i == rand) {
+                str += "?";
+            } else {
+                str += this.arr_right[i];
+            }
+            str += " ";
+        }
+        this.lb_team.string = str;
+
+        // 随机正确的值位置
+        this.right_index = parseInt(cc.random0To1() * 4);
+        let init_word_index = 0;
+        for (let i = 0; i < 4; i++) {
             let lb_node = new cc.Node('Label');
             let lb = lb_node.addComponent(cc.Label);
-            lb.string = this.INIT_CHOOSE[i + ""];
+            if (i == this.right_index) {
+                lb.string = this.right_word;
+            } else {
+                lb.string = this.INIT_CHOOSE[init_word_index++];
+            }
             lb.fontSize = 110;
             lb.lineHeight = 120;
-            lb_node.x = -120 + i * 120;
+            let moveX = -170 + i * 120;
+            let moveY = -180;
+            lb_node.x = 1900;
             lb_node.y = -180;
             lb_node.color = new cc.Color(226, 2, 69);
             this.lb_ch.push(lb_node);
@@ -116,6 +146,10 @@ cc.Class({
 
             lb_node.index = i;
             this.addClick(lb_node);
+
+            // 添加出现动画
+            let move1 = cc.moveTo(0.5 + 0.2 * i, moveX, moveY);
+            lb_node.runAction(move1.easing(cc.easeIn(2.0)));
         }
     },
 
@@ -125,7 +159,7 @@ cc.Class({
             cc.log("==", obj.index);
             let action = new cc.sequence(cc.scaleTo(0.1, 1.2, 1.2), cc.scaleTo(0.1, 1, 1));
             obj.runAction(action);
-            if (obj.index == 0) {
+            if (obj.index == self.right_index) {
                 self.gameSuccess();
             } else {
                 self.gameFail();
@@ -138,12 +172,22 @@ cc.Class({
         this.lb_dialog_title.string = "恭喜，你找对了\n再来一次？";
         this.node.opacity = 125;
         this.dialog.active = true;
+        for (let i = 0; i < this.lb_ch.length; i++) {
+            if (this.lb_ch[i] != null) {
+                this.lb_ch[i].off(cc.Node.EventType.TOUCH_END);
+            }
+        }
     },
 
     gameFail: function() {
         this.lb_dialog_title.string = "哦， 你选错了\n再来一次？";
         this.node.opacity = 125;
         this.dialog.active = true;
+        for (let i = 0; i < this.lb_ch.length; i++) {
+            if (this.lb_ch[i] != null) {
+                this.lb_ch[i].off(cc.Node.EventType.TOUCH_END);
+            }
+        }
     }
 
 });

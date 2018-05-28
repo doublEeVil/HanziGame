@@ -87,6 +87,16 @@ cc.Class({
             type: cc.AudioSource
         },
 
+        btn_task1: {
+            default: null,
+            type: cc.Node
+        },
+
+        btn_task2: {
+            default: null,
+            type: cc.Node
+        },
+
     },
 
     // LIFE-CYCLE CALLBACKS:
@@ -148,11 +158,13 @@ cc.Class({
         this.btn_back.on(cc.Node.EventType.TOUCH_END, function() {
             cc.log("btn_start pressed");
             //this.destroy();
-            if (self.getGameMode() == "richang") {
-                cc.director.loadScene("richang_level");
-            } else {
-                cc.director.loadScene("qimo_level");
-            }
+            // if (self.getGameMode() == "richang") {
+            //     cc.director.loadScene("richang_level");
+            // } else {
+            //     cc.director.loadScene("qimo_level");
+            // }
+
+            cc.director.loadScene("choose");
         });
 
 
@@ -177,6 +189,33 @@ cc.Class({
         this.lb_yuanbao.string = this.getYuanbao();
         this.lb_time.string = this.time_left + "s" ;
         this.lb_left_aim_num.string = "剩余目标个数 " + this.aim_num;
+
+
+        // 一进入游戏的按钮
+        self.game_type = 1;
+        self.btn_task1.setScale(1.1);
+        self.btn_task1.setColor(new cc.Color(235,123,67));
+        self.btn_task2.setScale(1.0);
+        self.btn_task2.setColor(new cc.Color(255,255,255));
+
+        this.btn_task1.on(cc.Node.EventType.TOUCH_END, function() {
+            self.btn_task1.setScale(1.1);
+            self.btn_task1.setColor(new cc.Color(235,123,67));
+            self.btn_task2.setScale(1.0);
+            self.btn_task2.setColor(new cc.Color(255,255,255));
+            self.game_type = 2;
+            self.isGameOver = true;
+            self.loadGame();
+        });
+        this.btn_task2.on(cc.Node.EventType.TOUCH_END, function() {
+            self.btn_task2.setScale(1.1);
+            self.btn_task2.setColor(new cc.Color(235,123,67));
+            self.btn_task1.setScale(1.0);
+            self.btn_task1.setColor(new cc.Color(255,255,255));
+            self.game_type = 1;
+            self.isGameOver = true;
+            self.loadGame();
+        });
     },
 
     getYuanbao: function() {
@@ -189,6 +228,29 @@ cc.Class({
 
     addYuanbao: function(num) {
         cc.sys.localStorage.setItem("yuanbao", this.getYuanbao() + num);
+
+        //显示效果
+        this.lb_yuanbao.string = this.getYuanbao();
+    },
+
+    /**
+     * 漂字
+     */
+    piaozi: function(str, x, y) {
+        console.log("++++")
+        var node =new cc.Node("node");
+        var label=node.addComponent(cc.Label);
+        label.string=str;
+        var color=new cc.Color(255,0, 0);
+        node.position=cc.p(x, y);
+        node.color=color;
+        this.node.addChild(node)
+        this.scheduleOnce(function() {
+            if (node != null) {
+                node.destroy();
+            }
+        }, 2);
+        node.runAction(cc.spawn(cc.moveTo(0.5, x, y + 100), cc.fadeOut(0.5)));
     },
 
     gameSuccess: function() {
@@ -228,6 +290,19 @@ cc.Class({
         this.time_left = this.INIT_TIME;
         this.aim_num = this.INIT_AIM_NUM;
 
+        for (let i = 0; i < this.allyu.length; i++) {
+            let yu = this.allyu[i];
+            if (yu != null) {
+                yu.destroy();
+            }
+        }
+        this.allyu = [];
+
+        if (this.aimCard != null) {
+            this.aimCard.destroy();
+        }
+
+
         //事件
         this.schedule(function(){
             this.time_left--;
@@ -236,12 +311,13 @@ cc.Class({
             }
 
             if (!this.audio_dida.isPlaying) {
-                // 循环播放
-                if (cc.sys.localStorage.getItem("audio") != "off") {
-                    this.audio_dida.play();
-                    this.audio_dida.loop = true;
+                if (this.time_left < 60) {
+                    // 循环播放
+                    if (cc.sys.localStorage.getItem("audio") != "off") {
+                        this.audio_dida.play();
+                        this.audio_dida.loop = true;
+                    }
                 }
-
             }
 
             if (this.time_left == 0) {
@@ -260,14 +336,27 @@ cc.Class({
 
         //1. 显示一张卡牌，然后消失
         let rand = this.getRand(22);
+        if (this.game_type == 1) {
+            rand = this.getRand(11);
+        } else {
+            rand = this.getRand(11) + 10;
+        }
         if (this.getGameMode() == "richang") {
-            rand = this.getRand(30)
+            rand = this.getRand(30);
+            if (this.game_type == 1) {
+                rand = this.getRand(19);
+                if (rand > 10) {
+                    rand = rand + 11;
+                }
+            } else {
+                rand = this.getRand(11) + 10;
+            }
         }
         let ani = this.card[rand];
         this.aimCard = cc.instantiate(ani);
         this.node.addChild(this.aimCard);
         this.scheduleOnce(function(){
-            let action = cc.spawn(cc.moveTo(2, 150, 260), cc.scaleTo(2, 0.1, 0.1));
+            let action = cc.spawn(cc.moveTo(2, 190, 260), cc.scaleTo(2, 0.1, 0.1));
             this.aimCard.runAction(action);
         }, 1);
         
@@ -282,12 +371,12 @@ cc.Class({
             }, this.aimCard);
 
             this.aimCard.on(cc.Node.EventType.TOUCH_END, function(){
-                this.setPosition(150, 260);
+                this.setPosition(190, 260);
                 this.setScale(0.1);
             }, this.aimCard);
 
             this.aimCard.on(cc.Node.EventType.TOUCH_CANCEL, function(){
-                this.setPosition(150, 260);
+                this.setPosition(190, 260);
                 this.setScale(0.1);
             }, this.aimCard);
 
@@ -312,11 +401,11 @@ cc.Class({
                 if (yu.direction == "left") {
                     //yu.x = this.getRand(1800) + 560;
                     yu.x = 1800 / this.yu_num * i + 560;
-                    yu.y = this.getRand(560) - 350;                   
+                    yu.y = this.getRand(440) - 240;                   
                 } else {
                     //yu.x = -this.getRand(1800) - 560;
                     yu.x = -1800 / this.yu_num * i - 560;
-                    yu.y = this.getRand(560) - 350;
+                    yu.y = this.getRand(440) - 240;
                 }
                
                 this.node.addChild(yu);
@@ -367,20 +456,45 @@ cc.Class({
                     }
                     
                     if (yu.type != self.aim_type) {
-                        return;
+                        // 点击一次即消失
+                        self.addYuanbao(1);
+                        // 漂字
+                        self.piaozi("+1", yu.x, yu.y);
+                    } else {
+                        // 需要点击两次消失
+                        yu.count++;
+                        if (yu.count < 2) {
+                            return;
+                        }
+                        self.addYuanbao(10);
+                        // 漂字
+                        self.piaozi("+10", yu.x, yu.y);
+                        self.aim_num--;
+                        self.lb_left_aim_num.string = "剩余目标个数 " + self.aim_num;
+                        if (self.aim_num == 0) {
+                            self.gameSuccess();
+                            return;
+                        }
                     }
-                    yu.count++;
-                    if (yu.count < 3) {
-                        return;
-                    }
-                    self.addYuanbao(1);
-                    self.lb_yuanbao.string = self.getYuanbao();
-                    self.aim_num--;
-                    self.lb_left_aim_num.string = "剩余目标个数 " + self.aim_num;
-                    if (self.aim_num == 0) {
-                        self.gameSuccess();
-                        return;
-                    }
+
+                    // if (yu.type != self.aim_type) {
+                    //     return;
+                    // }
+                    // yu.count++;
+                    // if (yu.count < 2) {
+                    //     return;
+                    // }
+                    // self.addYuanbao(10);
+
+                    // 漂字
+                    // self.piaozi("+10", yu.x, yu.y);
+
+                    // self.aim_num--;
+                    // self.lb_left_aim_num.string = "剩余目标个数 " + self.aim_num;
+                    // if (self.aim_num == 0) {
+                    //     self.gameSuccess();
+                    //     return;
+                    // }
 
                     self.removeArray(self.allyu, yu);
                     yu.destroy();
@@ -418,7 +532,7 @@ cc.Class({
             // } else {
             //     rand = 3.5;
             // }
-            rand = yu.index / 20 + 3 + yu.initSpeed;
+            rand = yu.index / 20 + 2 + yu.initSpeed;
 
             if (yu.direction == "left") {
                 yu.x = yu.x - rand;
@@ -463,10 +577,10 @@ cc.Class({
             yu.count = 0;
             if (yu.direction == "left") {
                 yu.x = this.getRand(500) + 640;
-                yu.y = this.getRand(560) - 350;
+                yu.y = this.getRand(440) - 240;
             } else {
                 yu.x = -this.getRand(500) - 640;
-                yu.y = this.getRand(560) - 350;
+                yu.y = this.getRand(440) - 240;
             }
             yu.type = this.getPerfabType(this.aniYu[rand]);
             yu.setGlobalZOrder(-1);

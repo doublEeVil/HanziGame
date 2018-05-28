@@ -69,21 +69,22 @@ cc.Class({
         });
 
         this.btn_xuexi.on(cc.Node.EventType.TOUCH_END, function() {
-            self.loading.node.active = true;
-            self.node.opacity = 50;
+            // self.loading.node.active = true;
+            // self.node.opacity = 50;
 
-            cc.loader.onProgress = function (num, total, item) {
-                cc.log(num, total);
-                self.loading.progress = num / total;
-                if (num == total) { 
-                    cc.director.loadScene("xuexi_qimo");
-                    cc.loader.onProgress = function(){}
-                }
-            }
+            // cc.loader.onProgress = function (num, total, item) {
+            //     cc.log(num, total);
+            //     self.loading.progress = num / total;
+            //     if (num == total) { 
+            //         cc.director.loadScene("xuexi_qimo");
+            //         cc.loader.onProgress = function(){}
+            //     }
+            // }
 
-            cc.director.preloadScene("xuexi_qimo", function() {
+            // cc.director.preloadScene("xuexi_qimo", function() {
 
-            });
+            // });
+            cc.director.loadScene("choose");
         });
 
         this.btn_ok.on(cc.Node.EventType.TOUCH_END, function(){
@@ -211,7 +212,7 @@ cc.Class({
             cc.sys.localStorage.setItem("qi_level_first", "true")
             return true;
         }
-        return true;
+        return false;
     }
     // update (dt) {},
 });

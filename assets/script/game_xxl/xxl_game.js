@@ -316,6 +316,30 @@ cc.Class({
             this.level = 6;
         }
         // this.level = 6;
+        let self = this;
+        // 按钮
+        if (this.level == 1 || this.level == 2) {
+            self.btn_task1.setScale(1.1);
+            self.btn_task1.setColor(new cc.Color(235,123,67));
+            self.btn_task2.setScale(1.0);
+            self.btn_task2.setColor(new cc.Color(255,255,255));
+            self.btn_task3.setScale(1.0);
+            self.btn_task3.setColor(new cc.Color(255,255,255));
+        } else if (this.level == 3 || this.level == 4) {
+            self.btn_task2.setScale(1.1);
+            self.btn_task2.setColor(new cc.Color(235,123,67));
+            self.btn_task1.setScale(1.0);
+            self.btn_task1.setColor(new cc.Color(255,255,255));
+            self.btn_task3.setScale(1.0);
+            self.btn_task3.setColor(new cc.Color(255,255,255));
+        } else {
+            self.btn_task3.setScale(1.1);
+            self.btn_task3.setColor(new cc.Color(235,123,67));
+            self.btn_task2.setScale(1.0);
+            self.btn_task2.setColor(new cc.Color(255,255,255));
+            self.btn_task1.setScale(1.0);
+            self.btn_task1.setColor(new cc.Color(255,255,255));
+        }
 
         this.dialog.active = false;
         this.canvas.opacity = 255;
@@ -347,8 +371,10 @@ cc.Class({
         if (this.objs != null && this.objs.length != 0) {
             for (let x = 0; x < this.X_NUM; x++) {
                 for (let y = 0; y < this.Y_NUM; y++) {
-                    this.objs[x][y].destroy();
-                    this.objs[x][y] = null;
+                    if (this.objs[x][y] != null) {
+                        this.objs[x][y].destroy();
+                        this.objs[x][y] = null;
+                    }
                 }
             }
         }
@@ -468,7 +494,6 @@ cc.Class({
             this.aim_node_2.active = false;
         }
 
-        let self = this;
         cc.log('xxl start');
         
         //先显示目标
@@ -504,13 +529,16 @@ cc.Class({
                 this.objs[x] = arrY;
             }
 
+            this.canTouch = true;
             this.addCallBack(this.node);
         
             // 初始化是否消除
             let arr = this.checkCanDestroy();
             var callback = function() {
                 //this.removeCallback();
+                this.canTouch = false;
                 if (arr == null) {
+                    this.canTouch = true;
                     return;
                 }
                 if (arr.length >= 3) {
@@ -519,6 +547,7 @@ cc.Class({
                     }, 0.1);
                 } else {
                     this.unschedule(callback);
+                    this.canTouch = true;
                     //this.addCallBack(this.node);
                 }
                 arr = this.checkCanDestroy();
@@ -635,8 +664,13 @@ cc.Class({
      * 添加点击事件
      */
     addCallBack: function(obj) {
+
         let self = this;
         obj.on(cc.Node.EventType.TOUCH_START, function(event) {
+
+            if (self.canTouch != true) {
+                return;
+            }
             var delta = event.touch.getDelta();
             obj.startTouchX = event.touch._startPoint.x - 50; //偏移量调整
             obj.startTouchY = event.touch._startPoint.y - 50;
@@ -650,6 +684,11 @@ cc.Class({
         });
 
         obj.on(cc.Node.EventType.TOUCH_END, function(event) {
+
+            if (self.canTouch != true) {
+                return;
+            }
+
             obj.endTouchX = event.touch._point.x - 50; //偏移量调整
             obj.endTouchY = event.touch._point.y - 50;
             console.log(obj.endTouchX, obj.endTouchY);
@@ -713,26 +752,53 @@ cc.Class({
         if (null == tObj) {
             return;
         }
+
+        // 
+        this.canTouch = false;
+
+        // 在这里先清除所有动作
+        for (let x = 0; x < this.X_NUM; x++) {
+            for (let y = 0; y < this.Y_NUM; y++) {
+                if (this.objs[x][y] == null) {
+                    continue;
+                }
+                this.objs[x][y].stopAllActions();
+                //强制定位
+                let posX = this.startX + (x * this.CELL_SIZE);
+                let posY = this.startY + (y * this.CELL_SIZE);
+                this.objs[x][y].setPosition(posX, posY);
+            }
+        }  
+
         // 对调位置
         obj.choose = true;
         tObj.choose = true;
 
         this.swap(obj, tObj);
+        this.canTouch = false;
 
         // 检测是否可以交换
         // 可以则交换， 并进行消除
         // 否则，回到原位
+        console.log("---1");
         let canDestroy = this.checkCanDestroy();
         //cc.log(canDestroy);
         if (canDestroy == null) {
-            return
+            this.canTouch = true;
+            return;
         }
+        console.log("---2");
         if (canDestroy.length < 3) {
             this.scheduleOnce(function() {
                 this.swap(obj, tObj);
             }, 0.3)
         } else  {
-            var callback = function() {
+            let callback = function() {
+                if (canDestroy == null) {
+                    this.unschedule(callback);
+                    this.canTouch = true;
+                    return;
+                }
                 if (canDestroy.length >= 3) {
                     //this.removeCallback();
                     this.scheduleOnce(function() {
@@ -740,6 +806,7 @@ cc.Class({
                     }, 0.1);
                 } else {
                     this.unschedule(callback);
+                    this.canTouch = true;
                     //this.addCallBack(this.node);
                 }
                 canDestroy = this.checkCanDestroy();
@@ -755,6 +822,9 @@ cc.Class({
      * 消除可以消除的
      */
     destroyObj: function(arr){
+        if (arr == null) {
+            return;
+        }
         if (arr.length < 3) {
             return;
         }
@@ -788,8 +858,10 @@ cc.Class({
                 this.lb_coin.string = "+" + this.getCoin();
             }
 
-            self.objs[arr[i].indexX][arr[i].indexY] = null;
+            // TODO 123456
             self.crashObj(arr[i]);
+            self.objs[arr[i].indexX][arr[i].indexY] = null;
+            
         }
         //可以消除， 播放音效
         if (cc.sys.localStorage.getItem("audio") != "off") { 
@@ -867,7 +939,8 @@ cc.Class({
                 //cc.log(x + " " + y + " " + this.objs[x][y])
                 if (this.objs[x][y] == null) {
                     // 暂时先这么做，防止卡死
-                    return;
+                    // return arr;
+                    continue;
                 }
                 if (x < this.X_NUM - 1) {
                     this.objs[x][y].right = this.objs[x+1][y];
@@ -890,6 +963,10 @@ cc.Class({
                 // 检测横是否
                 let xi = 1;
                 let curObj = this.objs[x][y];
+                if (curObj == null) {
+                    // TODO 暂时这么做
+                    continue;
+                }
                 let type = curObj.type;
                 let nextObj = curObj.right;
                 let tArr = [];
@@ -933,9 +1010,11 @@ cc.Class({
      */
     swap: function(objA, objB) {
         if (objA == null) {
+            this.canTouch = true;
             return;
         }
         if (objB == null) {
+            this.canTouch = true;
             return;
         }
         let objX = objA.x;
@@ -959,8 +1038,16 @@ cc.Class({
         let ay = this.startY + (objA.indexY * this.CELL_SIZE);
         let by = this.startY + (objB.indexY * this.CELL_SIZE);
 
-        objA.runAction(cc.moveTo(0.2, ax, ay));
-        objB.runAction(cc.moveTo(0.2, bx, by));
+        var finished = cc.callFunc(function () {
+            console.log("---" + this.canTouch);
+            this.canTouch = true;
+        }, this, null);
+
+        var myAction1 = cc.sequence(cc.moveTo(0.2, ax, ay), finished);
+        var myAction2 = cc.sequence(cc.moveTo(0.2, bx, by), finished);
+
+        objA.runAction(myAction1);
+        objB.runAction(myAction2);
     },
 
     /**

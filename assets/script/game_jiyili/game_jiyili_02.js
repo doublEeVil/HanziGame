@@ -173,6 +173,7 @@ cc.Class({
 
         this.curChooseIndex = 0;
 
+        this.reload_card = true; //是否重载卡牌
 
         // 判断音效
         if (cc.sys.localStorage.getItem("bgm") == "off") {
@@ -335,7 +336,10 @@ cc.Class({
         this.lb_time.string = (this.timeLeft + " s");
         this.curChooseIndex = 0;
         
-        this.reflushCardValues();
+        if (this.reload_card) {
+            this.reflushCardValues();
+        }
+
         for (let i = 0; i < this.cardsNotice.length; i++) {
             this.cardsNotice[i].destroy();
         }
@@ -397,7 +401,7 @@ cc.Class({
         for (let i = 0; i < this.cards.length; i++) {
             this.cards[i].off(cc.Node.EventType.TOUCH_START);
         }
-
+        this.reload_card = false;
     },
 
 
@@ -466,6 +470,10 @@ cc.Class({
                 }
             }
             self.showCardFace(tcard);
+            //同时发声
+            tcard.fayin = self.getFayin(tcard.value);
+            self.playAudio(tcard);
+
             self.cardsChoose.push(tcard);
             showIndex++;
         }, 1, 3)
@@ -513,7 +521,10 @@ cc.Class({
      * 加载错误的
      */
     loadWrongOrLike: function() {
-        this.reflushWrongValues();
+        if (this.reload_card) {
+            this.reflushWrongValues();
+        }
+        
         this.scheduleOnce(function() {
             // 再生成4张混淆的
             for(var i = 4; i < 8; i++) {
@@ -574,6 +585,7 @@ cc.Class({
 
                 this.addCoin(4);
                 this.lb_coin.string = "+" + this.getCoin();
+                this.reload_card  = true;
 
                 // 停止音乐
                 if (this.audio_dida.isPlaying) {
